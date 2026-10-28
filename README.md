@@ -1,5 +1,7 @@
 # Sleep to Train
 
+[Abrir aplicativo](https://san2014.github.io/sleep-to-train/) · [Repositório no GitHub](https://github.com/san2014/sleep-to-train)
+
 MVP pessoal para registrar informações diárias de sono e disposição para treino, gerando mensagens que podem ser copiadas para chats de acompanhamento.
 
 O aplicativo funciona em uma única página HTML, em português, sem conta, servidor ou dependências externas. Os dados são preenchidos manualmente; não há integração com relógios, aplicativos de saúde ou serviços de inteligência artificial.
