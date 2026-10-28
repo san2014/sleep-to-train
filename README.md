@@ -37,9 +37,10 @@ Abrir diretamente como arquivo (`file://`) pode apresentar limitações de persi
 
 1. Confira a data do registro, inicialmente preenchida com a data local do dispositivo.
 2. Preencha os dados de sono e de preparação para treino. Use `h:mm` para durações, por exemplo `7:22`.
-3. Clique em **Copiar para Sono** ou **Copiar para Treino** para escolher a mensagem e tentar copiá-la.
-4. Cole a mensagem no chat de acompanhamento desejado.
-5. Use **Exportar backup JSON** para manter uma cópia dos registros fora do navegador.
+3. Na seção **Meus chats no ChatGPT**, informe os endereços das conversas de sono e treino e clique em **Salvar links dos chats**. Use o endereço da barra do navegador, não um link compartilhado. Essa configuração é opcional e pode ser alterada quando o chat de treino mudar.
+4. Clique em **Copiar e abrir Sono** ou **Copiar e abrir Treino**. Sem link configurado, os botões continuam apenas copiando.
+5. Cole a mensagem no chat de acompanhamento desejado.
+6. Use **Exportar backup JSON** para manter uma cópia dos registros fora do navegador.
 
 Ao trocar a data, o formulário carrega o registro correspondente ou apresenta campos vazios. Cada data possui um único registro; editar seus campos atualiza esse registro.
 
@@ -82,3 +83,5 @@ O arquivo `index.html` encaminha para `./sleep-to-train.html`, preservando o fun
 Ao migrar do arquivo local para o endereço publicado, os registros antigos não aparecem automaticamente: exporte o backup no endereço anterior e importe no site publicado. Cada navegador continua mantendo seus próprios dados; a publicação não adiciona sincronização.
 
 Referência: [configuração da publicação no GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
+
+Os links dos chats são armazenados separadamente na chave `sleep-to-train-chats-v1` e não fazem parte do backup dos registros. A cópia automática precisa da permissão do navegador; em caso de falha, a prévia é selecionada para cópia manual. Se a abertura da aba for bloqueada, use o link apresentado após a cópia. Nenhuma mensagem é enviada automaticamente ao ChatGPT.

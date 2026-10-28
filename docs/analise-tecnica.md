@@ -152,3 +152,7 @@ Este roteiro fica como referência; não foi executado nesta análise.
 - Limpar uma data, recarregar e conferir que outra data permanece disponível.
 - Testar armazenamento bloqueado e cópia indisponível, conferindo os avisos.
 - Conferir o layout e a interação no navegador móvel utilizado no dia a dia.
+
+## Atualização: abrir conversas do ChatGPT
+
+O aplicativo permite salvar dois links de conversas (sono e treino) no navegador, usando a chave `sleep-to-train-chats-v1`. Os botões copiam a mensagem diária e abrem a conversa configurada; o usuário cola e envia. A configuração é separada dos registros e não entra no backup JSON. Links são validados como conversas HTTPS de `chatgpt.com` ou `chat.openai.com`, incluindo conversas de GPTs personalizados; links de compartilhamento são rejeitados. Há alternativas para cópia negada e abertura de aba bloqueada. Não há integração por API ou acesso ao conteúdo das conversas.

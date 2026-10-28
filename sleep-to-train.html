@@ -20,6 +20,7 @@
 <label>Estado mental<select name="mental"><option value="">Selecione</option><option>Focado</option><option>Sonolento</option><option>Irritado</option><option>Cansado</option><option>Disposto</option></select></label>
 <label>Dores musculares<input name="pain" placeholder="Ex.: lombar 2/10 ou nenhuma"></label>
 </div><label>Alimentação pré-treino<textarea name="meal" rows="2" placeholder="Ex.: banana, aveia, mel e café"></textarea></label><label>Observações do treino<textarea name="trainingNotes" rows="2" placeholder="Ex.: acordei sem disposição"></textarea></label></section></form>
+<section class="panel secondary"><h2>💬 Meus chats no ChatGPT</h2><p>Abra cada conversa no ChatGPT e copie o endereço da barra do navegador. Use o link da sua conversa, não um link de compartilhamento. Você pode trocar o chat de treino sempre que precisar.</p><form id="chatSettings"><label>Chat de monitoramento de sono<input id="sleepChat" type="url" placeholder="https://chatgpt.com/c/..." autocomplete="off"></label><label>Chat de treino<input id="trainingChat" type="url" placeholder="https://chatgpt.com/c/..." autocomplete="off"></label><button type="submit" class="outline">Salvar links dos chats</button><p id="chatStatus" role="status" aria-live="polite"></p></form><p>Os links ficam salvos neste navegador. Depois de copiar e abrir o chat, cole e envie a mensagem. Sem link configurado, o botão apenas copia.</p></section>
 <section class="panel"><h2>📋 Mensagem pronta</h2><div class="buttons"><button id="copySleep" type="button">Copiar para Sono</button><button id="copyTraining" type="button">Copiar para Treino</button></div><label>Prévia<textarea id="preview" rows="11" readonly></textarea></label><p id="status" role="status" aria-live="polite"></p></section>
 <section class="panel secondary"><h2>💾 Dados locais</h2><p>Os registros podem não persistir ao abrir arquivos locais no Android. Exporte um backup JSON após preencher. A cópia automática também pode ser bloqueada; nesse caso, selecione e copie o texto da prévia.</p><div class="buttons"><button id="backup" type="button" class="outline">Exportar backup JSON</button><button id="restore" type="button" class="outline">Importar backup</button><button id="clear" type="button" class="danger">Limpar formulário</button></div><input id="restoreFile" type="file" accept=".json,application/json" hidden></section>
 <footer>Sem conta, sem servidor. Seus dados permanecem neste dispositivo.</footer></main><script>"use strict";
@@ -48,7 +49,66 @@ function maskDuration(input){
 }
 form.addEventListener("input",e=>{if(durationFields.has(e.target.name))maskDuration(e.target);if(e.target.name==="date"){fill(records[e.target.value]||{date:e.target.value});render();return}persist();render()});
 form.addEventListener("change",e=>{if(e.target.name==="date"){fill(records[e.target.value]||{date:e.target.value})}else persist();render()});
-async function copy(type){mode=type;render();const value=preview.value;try{if(!navigator.clipboard?.writeText)throw Error("clipboard indisponível");await navigator.clipboard.writeText(value);status.textContent="Copiado! Agora é só colar no chat."}catch{preview.focus();preview.select();status.textContent="Use Selecionar texto e Copiar na prévia acima. No modo arquivo local, a cópia automática pode não funcionar."}}
+const CHAT_KEY="sleep-to-train-chats-v1";
+const chatInputs={sleep:document.querySelector("#sleepChat"),training:document.querySelector("#trainingChat")};
+const chatStatus=document.querySelector("#chatStatus");
+let chats={sleep:"",training:""};
+function chatUrl(value){
+ if(!value.trim())return "";
+ const url=new URL(value.trim());
+ if(url.protocol!=="https:"||!["chatgpt.com","chat.openai.com"].includes(url.hostname)||url.username||url.password||url.port||!/^\/(?:g\/[^/]+\/)?c\/[^/]+\/?$/.test(url.pathname))throw Error("Link inválido");
+ url.search="";url.hash="";
+ return url.href;
+}
+function updateChatButtons(){
+ document.querySelector("#copySleep").textContent=chats.sleep?"Copiar e abrir Sono":"Copiar para Sono";
+ document.querySelector("#copyTraining").textContent=chats.training?"Copiar e abrir Treino":"Copiar para Treino";
+}
+try{
+ const saved=JSON.parse(safeGet(CHAT_KEY)||"{}");
+ for(const type of ["sleep","training"]){try{chats[type]=chatUrl(saved[type]||"")}catch{}}
+}catch{}
+for(const type of ["sleep","training"])chatInputs[type].value=chats[type];
+updateChatButtons();
+document.querySelector("#chatSettings").addEventListener("submit",e=>{
+ e.preventDefault();
+ let next;
+ try{next={sleep:chatUrl(chatInputs.sleep.value),training:chatUrl(chatInputs.training.value)}}catch{
+  chatStatus.textContent="Use o endereço de uma conversa do ChatGPT: https://chatgpt.com/c/... (links compartilhados não são aceitos).";return;
+ }
+ chats=next;
+ for(const type of ["sleep","training"])chatInputs[type].value=chats[type];
+ updateChatButtons();
+ chatStatus.textContent=safeSet(CHAT_KEY,JSON.stringify(chats))?"Links salvos neste navegador.":"Links disponíveis nesta página, mas não foi possível salvá-los. Configure novamente ao reabrir.";
+});
+async function copy(type){
+ mode=type;render();
+ const value=preview.value,url=chats[type];
+ let tab=null;
+ try{
+  if(!navigator.clipboard?.writeText)throw Error("clipboard indisponível");
+  const copying=navigator.clipboard.writeText(value);
+  // Reserve a aba durante o clique para evitar bloqueio após a cópia assíncrona.
+  if(url){try{tab=window.open("about:blank","_blank");if(tab)tab.opener=null}catch{tab=null}}
+  await copying;
+ }catch{
+  if(tab)tab.close();
+  preview.focus();preview.select();
+  status.textContent="A cópia automática falhou. Copie manualmente o texto selecionado na prévia e abra sua conversa.";
+  if(url)addChatLink(url);
+  return;
+ }
+ status.textContent="Copiado! Agora é só colar e enviar no chat.";
+ if(url){
+  if(tab&&!tab.closed){try{tab.location.replace(url)}catch{tab.close();status.textContent="Copiado! Abra o chat pelo link abaixo e cole a mensagem."}}
+  else status.textContent="Copiado! A abertura da aba foi bloqueada. Abra o chat pelo link abaixo e cole a mensagem.";
+  addChatLink(url);
+ }
+}
+function addChatLink(url){
+ const link=document.createElement("a");link.href=url;link.target="_blank";link.rel="noopener noreferrer";link.textContent="Abrir conversa no ChatGPT";link.style.color="#6cc4ed";
+ status.append(document.createElement("br"),link);
+}
 document.querySelector("#copySleep").onclick=()=>copy("sleep");
 document.querySelector("#copyTraining").onclick=()=>copy("training");
 document.querySelector("#backup").onclick=()=>{persist();const blob=new Blob([JSON.stringify({version:1,records},null,2)],{type:"application/json"});const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`sleep-to-train-backup-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
