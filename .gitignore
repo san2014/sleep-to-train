@@ -1,0 +1,14 @@
+# Backups pessoais exportados pelo aplicativo
+health-checkin-backup-*.json
+
+# Configurações locais e credenciais
+.env
+.env.*
+!.env.example
+.aws/
+.codex/
+.agents/
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
