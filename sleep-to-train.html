@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#17283e"><title>Sleep to Train</title><style>:root{color-scheme:dark;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#0c1624;color:#edf3fc}*{box-sizing:border-box}body{margin:0}.wrap{max-width:720px;margin:auto;padding:22px 16px 48px}header{display:flex;justify-content:space-between;align-items:center}h1{margin:2px 0;font-size:1.8rem}h2{font-size:1.15rem;margin:0 0 16px}small{letter-spacing:.14em;color:#94b4db;font-weight:700}.pill{background:#28435c;padding:7px 12px;border-radius:30px}.intro,footer,.secondary p{color:#aabbd0}.panel{background:#17283e;border:1px solid #30445e;border-radius:18px;padding:18px;margin:16px 0;box-shadow:0 4px 16px #0002}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}label{display:block;color:#c8d8e9;font-size:.87rem;font-weight:600;margin:0 0 14px}input,select,textarea{display:block;width:100%;background:#0e1c2d;color:#fff;border:1px solid #496078;border-radius:10px;padding:12px;margin-top:7px;font:inherit;min-width:0}textarea{resize:vertical}input:focus,textarea:focus,select:focus{outline:2px solid #68b2e8;outline-offset:1px}.buttons{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}button{background:#6cc4ed;color:#071828;border:0;border-radius:10px;padding:13px 15px;font-weight:750;cursor:pointer;flex:1;min-width:145px}button:active{transform:scale(.99)}button.outline{background:#29465d;color:#eef6ff}button.danger{background:#533443;color:#ffced6}#status{min-height:20px;color:#a4e5bf;font-size:.9rem}footer{text-align:center;font-size:.8rem;margin-top:25px}@media(max-width:420px){.grid{grid-template-columns:1fr}.wrap{padding:16px 12px}h1{font-size:1.55rem}}</style></head>
+<body><main class="wrap"><header><div><small>SEU CHECK-IN DIÁRIO</small><h1>Sleep to Train</h1></div><span class="pill">V1</span></header>
+<p class="intro">Preencha uma vez. Copie para o chat de treino ou de sono.</p>
+<form id="form"><section class="panel"><h2>🌙 Sono</h2><div class="grid">
+<label>Data do registro<input name="date" type="date" required></label>
+<label>Hora que acordei<input name="wake" type="time"></label>
+<label>Sono total (h:mm)<input name="total" placeholder="7:22" inputmode="numeric" maxlength="5" pattern="[0-9]{1,2}:[0-5][0-9]"></label>
+<label>Profundo (h:mm)<input name="deep" placeholder="1:34" inputmode="numeric" maxlength="5" pattern="[0-9]{1,2}:[0-5][0-9]"></label>
+<label>REM (h:mm)<input name="rem" placeholder="2:01" inputmode="numeric" maxlength="5" pattern="[0-9]{1,2}:[0-5][0-9]"></label>
+<label>Leve (h:mm)<input name="light" placeholder="3:47" inputmode="numeric" maxlength="5" pattern="[0-9]{1,2}:[0-5][0-9]"></label>
+<label>Despertares (vezes)<input name="awakenings" type="number" min="0" max="99"></label>
+<label>Tempo acordado (min)<input name="awake" type="number" min="0" max="1440"></label>
+<label>Qualidade percebida (0–10)<input name="quality" type="number" min="0" max="10"></label>
+<label>Medicação (opcional)<input name="medication" placeholder="Nome, dose e horário"></label>
+</div><label>Observações sobre o sono<textarea name="sleepNotes" rows="2" placeholder="Ex.: despertei de madrugada, dor de cabeça..."></textarea></label></section>
+<section class="panel"><h2>🏋️ Treino</h2><div class="grid">
+<label>Energia (0–10)<input name="energy" type="number" min="0" max="10"></label>
+<label>Sonolência (0–10)<input name="sleepiness" type="number" min="0" max="10"></label>
+<label>Estado mental<select name="mental"><option value="">Selecione</option><option>Focado</option><option>Sonolento</option><option>Irritado</option><option>Cansado</option><option>Disposto</option></select></label>
+<label>Dores musculares<input name="pain" placeholder="Ex.: lombar 2/10 ou nenhuma"></label>
+</div><label>Alimentação pré-treino<textarea name="meal" rows="2" placeholder="Ex.: banana, aveia, mel e café"></textarea></label><label>Observações do treino<textarea name="trainingNotes" rows="2" placeholder="Ex.: acordei sem disposição"></textarea></label></section></form>
+<section class="panel"><h2>📋 Mensagem pronta</h2><div class="buttons"><button id="copySleep" type="button">Copiar para Sono</button><button id="copyTraining" type="button">Copiar para Treino</button></div><label>Prévia<textarea id="preview" rows="11" readonly></textarea></label><p id="status" role="status" aria-live="polite"></p></section>
+<section class="panel secondary"><h2>💾 Dados locais</h2><p>Os registros podem não persistir ao abrir arquivos locais no Android. Exporte um backup JSON após preencher. A cópia automática também pode ser bloqueada; nesse caso, selecione e copie o texto da prévia.</p><div class="buttons"><button id="backup" type="button" class="outline">Exportar backup JSON</button><button id="restore" type="button" class="outline">Importar backup</button><button id="clear" type="button" class="danger">Limpar formulário</button></div><input id="restoreFile" type="file" accept=".json,application/json" hidden></section>
+<footer>Sem conta, sem servidor. Seus dados permanecem neste dispositivo.</footer></main><script>"use strict";
+const KEY="health-checkin-v1";
+function safeGet(k){try{return localStorage.getItem(k)}catch{return null}}
+function safeSet(k,v){try{localStorage.setItem(k,v);return true}catch{return false}}
+
+const form=document.querySelector("#form"),preview=document.querySelector("#preview"),status=document.querySelector("#status");
+const today=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,"0"),String(d.getDate()).padStart(2,"0")].join("-")};
+const fields=()=>Object.fromEntries(new FormData(form).entries());
+let records={};
+try{const raw=JSON.parse(safeGet(KEY)||"{}");if(raw&&typeof raw==="object"&&!Array.isArray(raw))records=raw}catch{}
+function fill(data={}){for(const el of form.elements){if(!el.name)continue;el.value=data[el.name]??(el.name==="date"?today():"")}}
+function persist(){const data=fields();records[data.date]=data;try{safeSet(KEY,JSON.stringify(records));status.textContent="Salvo neste dispositivo."}catch{status.textContent="Não foi possível salvar no navegador."}}
+function row(label,value){return value!==""&&value!=null?`${label}: ${value}\n`:""}
+function sleepText(d){return `Check-in de sono\n`+row("Data",d.date)+row("Hora que acordei",d.wake)+row("Sono total",d.total)+row("Sono profundo",d.deep)+row("Sono REM",d.rem)+row("Sono leve",d.light)+row("Despertares",d.awakenings?`${d.awakenings}x`:(d.awakenings==="0"?"0x":""))+row("Tempo acordado",d.awake?`${d.awake} min`:(d.awake==="0"?"0 min":""))+row("Qualidade percebida",d.quality?`${d.quality}/10`:(d.quality==="0"?"0/10":""))+row("Medicação",d.medication)+row("Observações",d.sleepNotes)}
+function trainingText(d){return `Check-in para treino\n`+row("Data",d.date)+row("Hora que acordei",d.wake)+row("Sono total",d.total)+row("Sono profundo",d.deep)+row("Sono REM",d.rem)+row("Sono leve",d.light)+row("Despertares",d.awakenings?`${d.awakenings}x`:(d.awakenings==="0"?"0x":""))+row("Tempo acordado",d.awake?`${d.awake} min`:(d.awake==="0"?"0 min":""))+row("Energia",d.energy?`${d.energy}/10`:(d.energy==="0"?"0/10":""))+row("Sonolência",d.sleepiness?`${d.sleepiness}/10`:(d.sleepiness==="0"?"0/10":""))+row("Estado mental",d.mental)+row("Dores musculares",d.pain)+row("Alimentação pré-treino",d.meal)+row("Observações",d.trainingNotes)}
+let mode="sleep";
+function render(){preview.value=(mode==="sleep"?sleepText:trainingText)(fields())}
+const durationFields=new Set(["total","deep","rem","light"]);
+function maskDuration(input){
+ const original=input.value;
+ const digits=original.replace(/\D/g,"").slice(0,4);
+ if(original.includes(":") && /^\d{1,2}:\d{0,2}$/.test(original))return;
+ input.value=digits.length<=2?digits:`${digits.slice(0,-2)}:${digits.slice(-2)}`;
+}
+form.addEventListener("input",e=>{if(durationFields.has(e.target.name))maskDuration(e.target);if(e.target.name==="date"){fill(records[e.target.value]||{date:e.target.value});render();return}persist();render()});
+form.addEventListener("change",e=>{if(e.target.name==="date"){fill(records[e.target.value]||{date:e.target.value})}else persist();render()});
+async function copy(type){mode=type;render();const value=preview.value;try{if(!navigator.clipboard?.writeText)throw Error("clipboard indisponível");await navigator.clipboard.writeText(value);status.textContent="Copiado! Agora é só colar no chat."}catch{preview.focus();preview.select();status.textContent="Use Selecionar texto e Copiar na prévia acima. No modo arquivo local, a cópia automática pode não funcionar."}}
+document.querySelector("#copySleep").onclick=()=>copy("sleep");
+document.querySelector("#copyTraining").onclick=()=>copy("training");
+document.querySelector("#backup").onclick=()=>{persist();const blob=new Blob([JSON.stringify({version:1,records},null,2)],{type:"application/json"});const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`sleep-to-train-backup-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+document.querySelector("#restore").onclick=()=>document.querySelector("#restoreFile").click();
+document.querySelector("#restoreFile").onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text());if(data.version!==1||!data.records||typeof data.records!=="object"||Array.isArray(data.records))throw Error("Formato inválido");if(!confirm("Importar registros? Registros das mesmas datas serão substituídos."))return;records={...records,...data.records};safeSet(KEY,JSON.stringify(records));fill(records[today()]||{date:today()});render();status.textContent="Backup importado."}catch{status.textContent="Backup inválido ou não foi possível importar."}e.target.value=""};
+document.querySelector("#clear").onclick=()=>{if(!confirm("Limpar os campos da data selecionada?"))return;const date=fields().date;delete records[date];safeSet(KEY,JSON.stringify(records));fill({date});render();status.textContent="Registro da data removido."};
+fill(records[today()]||{date:today()});render();
+
+</script></body></html>

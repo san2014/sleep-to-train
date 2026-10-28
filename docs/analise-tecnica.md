@@ -1,6 +1,6 @@
 # Análise técnica inicial
 
-Análise estática do arquivo `health-checkin.html`, realizada em 27/10/2026. Este documento descreve o código disponível e não representa validação de execução em navegadores ou dispositivos reais.
+Análise estática realizada em 27/10/2026. O arquivo do aplicativo foi posteriormente renomeado para `sleep-to-train.html`; `health-checkin.html` passou a redirecionar para ele. Este documento descreve o código disponível e não representa validação de execução em navegadores ou dispositivos reais.
 
 ## Objetivo e escopo
 
@@ -92,7 +92,7 @@ No `localStorage`, a chave `health-checkin-v1` contém diretamente o objeto de r
 }
 ```
 
-O exemplo é fictício. A exportação tenta salvar os campos atuais antes de gerar `health-checkin-backup-YYYY-MM-DD.json`, incluindo todos os registros em memória. A data no nome do arquivo é a data local da exportação.
+O exemplo é fictício. A exportação tenta salvar os campos atuais antes de gerar `sleep-to-train-backup-YYYY-MM-DD.json`, incluindo todos os registros em memória. A data no nome do arquivo é a data local da exportação.
 
 A importação aceita apenas `version === 1` e exige `records` como objeto não nulo e não array. Após confirmação, mescla os registros com precedência do arquivo e volta a exibir o dia atual. Não valida cada registro, suas datas ou seus campos.
 

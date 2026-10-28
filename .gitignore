@@ -1,5 +1,6 @@
 # Backups pessoais exportados pelo aplicativo
 health-checkin-backup-*.json
+sleep-to-train-backup-*.json
 
 # Configurações locais e credenciais
 .env

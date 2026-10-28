@@ -21,7 +21,7 @@ O MVP coleta e organiza dados. Ainda não calcula indicadores, apresenta gráfic
 
 ## Como executar
 
-Abra `health-checkin.html` em um navegador moderno. Não há instalação de pacotes nem etapa de compilação.
+Abra `sleep-to-train.html` em um navegador moderno. Não há instalação de pacotes nem etapa de compilação.
 
 Para servir o arquivo localmente, caso tenha Python 3 instalado:
 
@@ -29,7 +29,7 @@ Para servir o arquivo localmente, caso tenha Python 3 instalado:
 python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
-Acesse `http://localhost:8000/health-checkin.html`. Mantenha o mesmo navegador e endereço para acessar os registros armazenados naquela origem.
+Acesse `http://localhost:8000/sleep-to-train.html`. Mantenha o mesmo navegador e endereço para acessar os registros armazenados naquela origem.
 
 Abrir diretamente como arquivo (`file://`) pode apresentar limitações de persistência, especialmente no Android, e de acesso à área de transferência. A própria interface orienta exportar backups e usar cópia manual quando necessário.
 
@@ -49,7 +49,8 @@ Ao trocar a data, o formulário carrega o registro correspondente ou apresenta c
 
 | Arquivo | Finalidade |
 | --- | --- |
-| `health-checkin.html` | Interface, estilos e toda a lógica do aplicativo |
+| `sleep-to-train.html` | Interface, estilos e toda a lógica do aplicativo |
+| `health-checkin.html` | Redirecionamento de compatibilidade para links antigos |
 | `index.html` | Entrada do site, que encaminha para o aplicativo |
 | `README.md` | Visão geral e instruções de uso |
 | `docs/analise-tecnica.md` | Arquitetura, dados, limitações e sugestões de evolução |
@@ -60,6 +61,8 @@ Tecnologias: HTML, CSS e JavaScript nativos, com `localStorage`, `FormData`, Cli
 
 Os registros são gravados como JSON na chave `health-checkin-v1` do `localStorage`. O código atual não faz requisições de rede nem envia dados automaticamente para serviços externos.
 
+A chave interna mantém o nome original para preservar os dados existentes. Os novos backups usam o prefixo `sleep-to-train-backup-`; backups antigos continuam compatíveis.
+
 Os dados ficam vinculados ao navegador e à origem em que a página foi aberta. Limpar os dados do navegador pode removê-los. Não há sincronização entre dispositivos, autenticação ou criptografia implementada pelo aplicativo. Backups incluem os campos preenchidos, inclusive medicação e observações. Ao colar uma mensagem em um chat, o compartilhamento é feito pelo próprio usuário.
 
 Há uma falha conhecida no aviso de salvamento: a interface pode informar sucesso mesmo quando o navegador não consegue persistir os dados. Até a correção, mantenha backups e confira a recuperação dos registros após reabrir a página.
@@ -68,13 +71,13 @@ Consulte a [análise técnica inicial](docs/analise-tecnica.md) para os detalhes
 
 ## Publicação no GitHub Pages
 
-1. Envie `index.html`, `health-checkin.html`, `.nojekyll`, `.gitignore`, `README.md` e `docs/` para um repositório no GitHub. Não inclua backups pessoais.
+1. Envie `index.html`, `sleep-to-train.html`, `health-checkin.html`, `.nojekyll`, `.gitignore`, `README.md` e `docs/` para um repositório no GitHub. Não inclua backups pessoais.
 2. No repositório, abra **Settings → Pages**.
 3. Em **Source**, selecione **Deploy from a branch**.
 4. Selecione a branch que contém os arquivos (por exemplo, `main`), a pasta **/(root)** e clique em **Save**.
 5. Aguarde a publicação e abra o endereço indicado pelo GitHub Pages.
 
-O arquivo `index.html` encaminha para `./health-checkin.html`, preservando o funcionamento em endereços com o nome do repositório. O arquivo `.nojekyll` dispensa o processamento por Jekyll.
+O arquivo `index.html` encaminha para `./sleep-to-train.html`, preservando o funcionamento em endereços com o nome do repositório. O arquivo `.nojekyll` dispensa o processamento por Jekyll.
 
 Ao migrar do arquivo local para o endereço publicado, os registros antigos não aparecem automaticamente: exporte o backup no endereço anterior e importe no site publicado. Cada navegador continua mantendo seus próprios dados; a publicação não adiciona sincronização.
 
