@@ -1,4 +1,4 @@
-# Health Check-in
+# Sleep to Train
 
 MVP pessoal para registrar informações diárias de sono e disposição para treino, gerando mensagens que podem ser copiadas para chats de acompanhamento.
 
